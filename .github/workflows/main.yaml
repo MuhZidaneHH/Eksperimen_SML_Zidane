@@ -1,0 +1,45 @@
+name: Automate Preprocessing
+
+# Trigger: Jalan setiap ada push ke branch main
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout kode dari repo
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. Siapkan Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    # 3. Install dependencies
+    - name: Install dependencies
+      run: |
+        pip install -r preprocessing/requirements.txt
+
+    # 4. Jalankan script otomatisasi
+    - name: Run Preprocessing Script
+      run: |
+        cd preprocessing
+        python automate_*.py
+
+    # 5. Commit dan Push hasil data baru ke Repo
+    - name: Commit and Push changes
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add preprocessing/TelcoCustomerChurn_preprocessing/*.csv
+        git commit -m "Auto-update processed datasets" || echo "No changes to commit"
+        git push
